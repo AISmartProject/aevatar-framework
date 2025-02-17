@@ -24,6 +24,11 @@ public class GAgentFactory : IGAgentFactory
         return gAgent;
     }
 
+    public Task<IGAgent> GetGAgentAsync(GrainType grainType, string primaryKeySeed, InitializationEventBase? initializationEvent = null)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<IGAgent> GetGAgentAsync(Guid primaryKey, string alias, string ns,
         InitializationEventBase? initializationEvent = null)
     {
@@ -32,6 +37,12 @@ public class GAgentFactory : IGAgentFactory
                 primaryKey.ToString("N")));
         await InitializeGAgentAsync(gAgent, initializationEvent);
         return gAgent;
+    }
+
+    public Task<IGAgent> GetGAgentAsync(string primaryKeySeed, string alias, string ns,
+        InitializationEventBase? initializationEvent = null)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<IGAgent> GetGAgentAsync(string alias, string ns,
@@ -47,6 +58,11 @@ public class GAgentFactory : IGAgentFactory
             initializationEvent: initializationEvent);
     }
 
+    public Task<IGAgent> GetGAgentAsync(string primaryKeySeed, Type gAgentType, InitializationEventBase? initializationEvent = null)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<IGAgent> GetGAgentAsync(Type gAgentType, InitializationEventBase? initializationEvent = null)
     {
         return await GetGAgentAsync(gAgentType.Name, ns: gAgentType.Namespace!,
@@ -60,6 +76,11 @@ public class GAgentFactory : IGAgentFactory
         var gAgent = _clusterClient.GetGrain<TGrainInterface>(primaryKey);
         await InitializeGAgentAsync(gAgent, initializationEvent);
         return gAgent;
+    }
+
+    public Task<TGrainInterface> GetGAgentAsync<TGrainInterface>(string primaryKeySeed, InitializationEventBase? initializationEvent = null) where TGrainInterface : IGAgent
+    {
+        throw new NotImplementedException();
     }
 
     public Task<TGrainInterface> GetGAgentAsync<TGrainInterface>(InitializationEventBase? initializationEvent = null)
