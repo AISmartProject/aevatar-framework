@@ -21,6 +21,7 @@
     <PackageVersion Include="Microsoft.Orleans.Serialization.Abstractions" Version="9.0.1" />
     <PackageVersion Include="Microsoft.SemanticKernel" Version="1.33.0" />
     <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.33.0" />
+    <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="OpenAI.API" Version="1.0.0" />
     <PackageVersion Include="Orleans.SyncWork" Version="8.1.12" />
     <PackageVersion Include="Serilog.Formatting.Compact" Version="2.0.0" />

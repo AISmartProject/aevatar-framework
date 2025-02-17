@@ -17,6 +17,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Orleans.Runtime" />
+        <PackageReference Include="Mono.Cecil" />
         <PackageReference Include="Volo.Abp.Authorization" />
         <PackageReference Include="Volo.Abp.Authorization.Abstractions" />
         <PackageReference Include="Volo.Abp.Core" />
