@@ -27,6 +27,7 @@ public class InvestorTestGAgent : GAgentBase<InvestorTestGAgentState, NaiveTestS
         return Task.FromResult("This GAgent acts as a investor.");
     }
 
+    [Publish([typeof(InvestorFeedbackTestEvent)])]
     public async Task HandleEventAsync(WorkingOnTestEvent eventData)
     {
         if (State.Content.IsNullOrEmpty())
