@@ -31,6 +31,7 @@ public abstract partial class GAgentBase<TState, TStateLogEvent, TEvent, TConfig
                         ?.GetValue(item)!;
                     var eventType = (TEvent)item.GetType().GetProperty(nameof(EventWrapper<TEvent>.Event))
                         ?.GetValue(item)!;
+                    _correlationId = eventType.CorrelationId;
 
                     if (parameterType == eventType.GetType())
                     {

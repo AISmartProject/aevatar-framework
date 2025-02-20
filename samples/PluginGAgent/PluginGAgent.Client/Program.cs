@@ -1,6 +1,6 @@
-﻿using Aevatar;
-using Aevatar.ArtifactGAgents;
+﻿using Aevatar.ArtifactGAgents;
 using Aevatar.Core.Abstractions;
+using Aevatar.Core.Abstractions.Extensions;
 using Aevatar.Core.Abstractions.Plugin;
 using Aevatar.Core.Tests.TestGAgents;
 using Aevatar.Extensions;
@@ -97,5 +97,5 @@ async Task CallPermissionGAgent(IGAgentFactory factory)
         Role = "User"
     });
     var permissionGAgent = await factory.GetGAgentAsync<IPermissionGAgent>();
-    await permissionGAgent.DoSomethingAsync();
+    await permissionGAgent.DoSomething1Async();
 }

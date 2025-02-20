@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Aevatar.Plugins.Extensions;
+namespace Aevatar.Core.Abstractions.Extensions;
 
 public static class StringExtensions
 {

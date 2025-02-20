@@ -1,7 +1,6 @@
 using Aevatar.Core.Abstractions;
 using Aevatar.Core.Tests.TestEvents;
 using Aevatar.Core.Tests.TestGAgents;
-using Aevatar.Core.Tests.TestStates;
 using Shouldly;
 
 namespace Aevatar.GAgents.Tests;
