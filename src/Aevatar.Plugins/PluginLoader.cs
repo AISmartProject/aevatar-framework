@@ -1,5 +1,9 @@
 namespace Aevatar.Plugins;
 
+/// <summary>
+/// Used to load plugins from a directory.
+/// Keep this helper for testing.
+/// </summary>
 public static class PluginLoader
 {
     public static List<byte[]> LoadPlugins(string pluginsDirectory)

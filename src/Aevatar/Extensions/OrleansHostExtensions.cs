@@ -1,9 +1,9 @@
-using System.Reflection;
-using Aevatar.Plugins;
+using Aevatar.Plugins.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using Volo.Abp;
 using Volo.Abp.Modularity;
+using Volo.Abp.Threading;
 
 namespace Aevatar.Extensions;
 
@@ -17,12 +17,12 @@ public static class OrleansHostExtensions
         return builder
             .ConfigureServices(services =>
             {
+                AsyncHelper.RunSync(() => LoadPluginsAsync(services, abpApplication));
+
                 foreach (var service in abpApplication.Services)
                 {
                     services.Add(service);
                 }
-
-                LoadPlugins(services);
             });
     }
 
@@ -41,17 +41,13 @@ public static class OrleansHostExtensions
                 }
             });
     }
-    
-    private static void LoadPlugins(IServiceCollection services)
+
+    private static async Task LoadPluginsAsync(IServiceCollection services, IAbpApplicationWithInternalServiceProvider application)
     {
-        var configuration = services.GetConfiguration();
-        var pluginConfig = configuration.GetSection("Plugins");
-        var pluginDirectory = pluginConfig["Directory"];
-        if (pluginDirectory.IsNullOrEmpty()) return;
-        var pluginCodes = PluginLoader.LoadPlugins(pluginDirectory);
+        var assemblies = await application.GetTenantPluginAssemblyListAsync();
         services.AddSerializer(options =>
         {
-            foreach (var assembly in pluginCodes.Select(Assembly.Load))
+            foreach (var assembly in assemblies)
             {
                 options.AddAssembly(assembly);
             }

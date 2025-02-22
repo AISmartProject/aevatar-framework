@@ -1,3 +1,4 @@
+using Aevatar.Core.Abstractions.Extensions;
 using Aevatar.Plugins.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

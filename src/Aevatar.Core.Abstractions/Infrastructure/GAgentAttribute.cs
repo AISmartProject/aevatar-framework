@@ -29,14 +29,14 @@ public sealed class GAgentAttribute : Attribute, IGrainTypeProviderAttribute
     {
         if (_alias == null) // Use ctor with 0 parameters.
         {
-            return GrainType.Create($"{type.Namespace}/{type.Name}");
+            return GrainType.Create($"{type.Namespace}{AevatarCoreConstants.GAgentNamespaceSeparator}{type.Name}");
         }
 
         if (_ns == null)
         {
-            return GrainType.Create($"{type.Namespace}/{_alias}");
+            return GrainType.Create($"{type.Namespace}{AevatarCoreConstants.GAgentNamespaceSeparator}{_alias}");
         }
 
-        return GrainType.Create($"{_ns}/{_alias}");
+        return GrainType.Create($"{_ns}{AevatarCoreConstants.GAgentNamespaceSeparator}{_alias}");
     }
 }
