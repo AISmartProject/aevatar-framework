@@ -1,8 +1,7 @@
 using Aevatar.Core;
 using Aevatar.Core.Abstractions;
-using Microsoft.Extensions.Logging;
 
-namespace Aevatar.Plugins;
+namespace Aevatar.Plugins.GAgents;
 
 [GenerateSerializer]
 public class PluginCodeStorageGAgentState : StateBase
@@ -11,10 +10,7 @@ public class PluginCodeStorageGAgentState : StateBase
 }
 
 [GenerateSerializer]
-public class PluginCodeStorageStateLogEvent : StateLogEventBase<PluginCodeStorageStateLogEvent>
-{
-    
-}
+public class PluginCodeStorageStateLogEvent : StateLogEventBase<PluginCodeStorageStateLogEvent>;
 
 [GenerateSerializer]
 public class PluginCodeStorageConfiguration : ConfigurationBase

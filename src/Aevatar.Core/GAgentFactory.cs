@@ -1,5 +1,6 @@
 using Aevatar.Core.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Orleans.Streams;
 
 namespace Aevatar.Core;
@@ -7,11 +8,13 @@ namespace Aevatar.Core;
 public class GAgentFactory : IGAgentFactory
 {
     private readonly IClusterClient _clusterClient;
+    private readonly AevatarOptions _aevatarOptions;
     private readonly IStreamProvider _streamProvider;
 
     public GAgentFactory(IClusterClient clusterClient)
     {
         _clusterClient = clusterClient;
+        _aevatarOptions = _clusterClient.ServiceProvider.GetRequiredService<IOptions<AevatarOptions>>().Value;
         _streamProvider =
             _clusterClient.ServiceProvider.GetRequiredKeyedService<IStreamProvider>(AevatarCoreConstants
                 .StreamProvider);
@@ -28,7 +31,7 @@ public class GAgentFactory : IGAgentFactory
         ConfigurationBase? configuration = null)
     {
         var gAgent =
-            _clusterClient.GetGrain<IGAgent>(GrainId.Create($"{ns}/{alias}",
+            _clusterClient.GetGrain<IGAgent>(GrainId.Create($"{ns}{AevatarCoreConstants.GAgentNamespaceSeparator}{alias}",
                 primaryKey.ToString("N")));
         await ConfigGAgentAsync(gAgent, configuration);
         return gAgent;
@@ -75,7 +78,7 @@ public class GAgentFactory : IGAgentFactory
         if (configuration != null)
         {
             var eventWrapper = new EventWrapper<EventBase>(configuration, Guid.NewGuid(), gAgent.GetGrainId());
-            var streamId = StreamId.Create(AevatarCoreConstants.StreamNamespace, gAgent.GetGrainId().ToString());
+            var streamId = StreamId.Create(_aevatarOptions.StreamNamespace, gAgent.GetGrainId().ToString());
             var stream = _streamProvider.GetStream<EventWrapperBase>(streamId);
             await stream.OnNextAsync(eventWrapper);
         }

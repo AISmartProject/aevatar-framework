@@ -1,10 +1,11 @@
-﻿using Aevatar;
-using Aevatar.ArtifactGAgents;
+﻿using Aevatar.ArtifactGAgents;
 using Aevatar.Core.Abstractions;
+using Aevatar.Core.Abstractions.Extensions;
 using Aevatar.Core.Abstractions.Plugin;
 using Aevatar.Core.Tests.TestGAgents;
 using Aevatar.Extensions;
 using Aevatar.PermissionManagement;
+using Aevatar.Plugins;
 using Aevatar.Plugins.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,10 +26,12 @@ var builder = Host.CreateDefaultBuilder(args)
 using var host = builder.Build();
 await host.StartAsync();
 
+var pluginManager = host.Services.GetRequiredService<IPluginGAgentManager>();
 var gAgentFactory = host.Services.GetRequiredService<IGAgentFactory>();
 var gAgentManager = host.Services.GetRequiredService<IGAgentManager>();
 
 Console.WriteLine("Select an option:");
+Console.WriteLine("0. Add plugin code");
 Console.WriteLine("1. Try Execute Plugin GAgents");
 Console.WriteLine("2. Try Get Artifact GAgent");
 Console.WriteLine("3. Show all candidate GAgents");
@@ -37,6 +40,9 @@ var choice = Console.ReadLine();
 
 switch (choice)
 {
+    case "0":
+        await AddCodeAsync(pluginManager);
+        break;
     case "1":
         await PerformCommandAsync(gAgentFactory);
         break;
@@ -47,17 +53,32 @@ switch (choice)
         ListCandidateGAgents(gAgentManager);
         break;
     case "4":
-        CallPermissionGAgent(gAgentFactory);
+        await CallPermissionGAgent(gAgentFactory);
         break;
     default:
         Console.WriteLine("Invalid choice.");
         break;
 }
 
+async Task AddCodeAsync(IPluginGAgentManager pluginGAgentManager)
+{
+    var plugins = PluginLoader.LoadPlugins("plugins");
+
+    var tenantId = "test".ToGuid();
+    foreach (var code in plugins)
+    {
+        await pluginGAgentManager.AddPluginAsync(new AddPluginDto
+        {
+            Code = code,
+            TenantId = tenantId
+        });
+    }
+}
+
 async Task PerformCommandAsync(IGAgentFactory factory)
 {
     var publishingGAgent = await factory.GetGAgentAsync<IPublishingGAgent>();
-    var commander = await factory.GetGAgentAsync(GrainId.Create("pluginTest/commander", Guid.NewGuid().ToString("N")));
+    var commander = await factory.GetGAgentAsync(GrainId.Create("pluginTest.commander", Guid.NewGuid().ToString("N")));
     var worker = await factory.GetGAgentAsync("worker", "pluginTest");
     await publishingGAgent.RegisterAsync(commander);
     await commander.RegisterAsync(worker);
@@ -97,5 +118,5 @@ async Task CallPermissionGAgent(IGAgentFactory factory)
         Role = "User"
     });
     var permissionGAgent = await factory.GetGAgentAsync<IPermissionGAgent>();
-    await permissionGAgent.DoSomethingAsync();
+    await permissionGAgent.DoSomething1Async();
 }

@@ -3,6 +3,7 @@ using Aevatar.Core.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Orleans.EventSourcing;
 using Orleans.Providers;
@@ -47,10 +48,12 @@ public abstract partial class
     private readonly List<EventWrapperBaseAsyncObserver> _observers = [];
 
     private IEventDispatcher? EventDispatcher { get; set; }
+    private readonly AevatarOptions _aevatarOptions;
 
     protected GAgentBase()
     {
         EventDispatcher = ServiceProvider.GetService<IEventDispatcher>();
+        _aevatarOptions = ServiceProvider.GetRequiredService<IOptionsSnapshot<AevatarOptions>>().Value;
     }
 
     public async Task ActivateAsync()
@@ -298,7 +301,7 @@ public abstract partial class
 
     private IAsyncStream<EventWrapperBase> GetStream(string grainIdString)
     {
-        var streamId = StreamId.Create(AevatarCoreConstants.StreamNamespace, grainIdString);
+        var streamId = StreamId.Create(_aevatarOptions.StreamNamespace, grainIdString);
         return StreamProvider.GetStream<EventWrapperBase>(streamId);
     }
 }

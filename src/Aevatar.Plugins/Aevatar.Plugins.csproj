@@ -20,4 +20,13 @@
       <ProjectReference Include="..\Aevatar.EventSourcing.Core\Aevatar.EventSourcing.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Volo.Abp.Autofac" />
+      <PackageReference Include="Volo.Abp.AutoMapper" />
+      <PackageReference Include="Volo.Abp.Core" />
+      <PackageReference Include="Volo.Abp.Data" />
+      <PackageReference Include="Volo.Abp.Ddd.Application" />
+      <PackageReference Include="Volo.Abp.MongoDB" />
+    </ItemGroup>
+
 </Project>

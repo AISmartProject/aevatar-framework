@@ -2,7 +2,7 @@
 using Aevatar.Core.Abstractions;
 using Aevatar.Core.Abstractions.Plugin;
 using Aevatar.EventSourcing.Core.Snapshot;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Aevatar.Plugins.GAgents;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,20 +10,18 @@ using Orleans.Storage;
 
 namespace Aevatar.Plugins;
 
-public class PluginGAgentManager : IPluginGAgentManager, ILifecycleParticipant<ISiloLifecycle>
+public class PluginGAgentManager : IPluginGAgentManager
 {
     protected readonly ILogger<PluginGAgentManager> Logger;
 
-    private readonly ApplicationPartManager _applicationPartManager;
     private readonly IGAgentFactory _gAgentFactory;
     private readonly IServiceProvider _serviceProvider;
     private readonly PluginGAgentLoadOptions _options;
 
-    public PluginGAgentManager(ApplicationPartManager applicationPartManager, IGAgentFactory gAgentFactory,
+    public PluginGAgentManager(IGAgentFactory gAgentFactory,
         IOptions<PluginGAgentLoadOptions> options, ILogger<PluginGAgentManager> logger,
         IServiceProvider serviceProvider)
     {
-        _applicationPartManager = applicationPartManager;
         _gAgentFactory = gAgentFactory;
         Logger = logger;
         _serviceProvider = serviceProvider;
@@ -117,12 +115,13 @@ public class PluginGAgentManager : IPluginGAgentManager, ILifecycleParticipant<I
         var assemblies = new List<Assembly>();
         var grainStorage = _serviceProvider.GetRequiredKeyedService<IGrainStorage>("PubSubStore");
         var tenantGrainState = new GrainState<ViewStateSnapshotWithMetadata<TenantPluginCodeGAgentState>>();
-        var tenantGrainId = GrainId.Create("Aevatar.Plugins/pluginTenant", tenantId.ToString("N"));
+        var tenantGrainId = GrainId.Create("Aevatar.Plugins.pluginTenant", tenantId.ToString("N"));
         await grainStorage.ReadStateAsync(typeof(TenantPluginCodeGAgent).FullName, tenantGrainId, tenantGrainState);
         if (tenantGrainState.State == null)
         {
             return assemblies;
         }
+
         var tenantState = tenantGrainState.State.Snapshot;
         if (tenantState.CodeStorageGuids.IsNullOrEmpty()) return new List<Assembly>();
 
@@ -130,77 +129,8 @@ public class PluginGAgentManager : IPluginGAgentManager, ILifecycleParticipant<I
         {
             var pluginCodeStorageGrainState =
                 new GrainState<ViewStateSnapshotWithMetadata<PluginCodeStorageGAgentState>>();
-            var codeGrainId = GrainId.Create("Aevatar.Plugins/pluginCodeStorage", pluginCodeStorageGuid.ToString("N"));
+            var codeGrainId = GrainId.Create("Aevatar.Plugins.pluginCodeStorage", pluginCodeStorageGuid.ToString("N"));
             await grainStorage.ReadStateAsync(typeof(PluginCodeStorageGAgent).FullName, codeGrainId,
-                pluginCodeStorageGrainState);
-            var code = pluginCodeStorageGrainState.State.Snapshot.Code;
-            assemblies.Add(Assembly.Load(code));
-        }
-
-        return assemblies;
-    }
-
-    private async Task LoadPluginGAgentsAsync(Guid tenantId)
-    {
-        var assemblies = await GetPluginAssembliesAsync(tenantId);
-        foreach (var assembly in assemblies)
-        {
-            _applicationPartManager.ApplicationParts.Add(new AssemblyPart(assembly));
-            Logger.LogInformation("Loaded assembly: {Assembly}", assembly.FullName);
-        }
-    }
-
-    public void Participate(ISiloLifecycle lifecycle)
-    {
-        lifecycle.Subscribe(
-            nameof(PluginGAgentManager),
-            ServiceLifecycleStage.First,
-            OnStart
-        );
-    }
-
-    private async Task OnStart(CancellationToken cancellationToken)
-    {
-        if (_options.TenantId == Guid.Empty) return;
-        await LoadPluginGAgentsAsync(_options.TenantId);
-
-        foreach (var part in _applicationPartManager.ApplicationParts.OfType<AssemblyPart>())
-        {
-            foreach (var type in part.Types)
-            {
-                if (typeof(IGAgent).IsAssignableFrom(type))
-                {
-                    Logger.LogInformation("Registered GAgent: {GrainType}", type.FullName);
-                }
-            }
-        }
-    }
-}
-
-public class TestManager
-{
-    private readonly IGrainStorage _grainStorage;
-
-    public TestManager(IGrainStorage grainStorage)
-    {
-        _grainStorage = grainStorage;
-    }
-
-    public async Task<List<Assembly>> GetAssemblies(Guid tenantId)
-    {
-        var assemblies = new List<Assembly>();
-        var tenantGrainState = new GrainState<ViewStateSnapshotWithMetadata<TenantPluginCodeGAgentState>>();
-        var tenantGrainId = GrainId.Create("Aevatar.Plugins/pluginTenant", tenantId.ToString("N"));
-        await _grainStorage.ReadStateAsync(typeof(TenantPluginCodeGAgent).FullName, tenantGrainId, tenantGrainState);
-        var tenantState = tenantGrainState.State.Snapshot;
-        if (tenantState.CodeStorageGuids.IsNullOrEmpty()) return new List<Assembly>();
-
-        foreach (var pluginCodeStorageGuid in tenantState.CodeStorageGuids)
-        {
-            var pluginCodeStorageGrainState =
-                new GrainState<ViewStateSnapshotWithMetadata<PluginCodeStorageGAgentState>>();
-            var codeGrainId = GrainId.Create("Aevatar.Plugins/pluginCodeStorage", pluginCodeStorageGuid.ToString("N"));
-            await _grainStorage.ReadStateAsync(typeof(PluginCodeStorageGAgent).FullName, codeGrainId,
                 pluginCodeStorageGrainState);
             var code = pluginCodeStorageGrainState.State.Snapshot.Code;
             assemblies.Add(Assembly.Load(code));

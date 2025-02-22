@@ -1,8 +1,7 @@
 using Aevatar.Core;
 using Aevatar.Core.Abstractions;
-using Microsoft.Extensions.Logging;
 
-namespace Aevatar.Plugins;
+namespace Aevatar.Plugins.GAgents;
 
 [GenerateSerializer]
 public class TenantPluginCodeGAgentState : StateBase
