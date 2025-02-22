@@ -1,14 +1,8 @@
 using System.Collections.Immutable;
-using System.Reflection;
-using Aevatar.Core;
 using Aevatar.Core.Abstractions;
-using Aevatar.Core.Abstractions.Plugin;
 using Aevatar.Extensions;
 using Aevatar.PermissionManagement.Extensions;
-using Aevatar.Plugins;
-using Aevatar.Plugins.Extensions;
 using AutoMapper;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -108,6 +102,7 @@ public class ClusterFixture : IDisposable, ISingletonDependency
                 .UseAevatar()
                 .UseAevatarPermissionManagement()
                 .AddMemoryStreams("Aevatar")
+                .AddMemoryStreams("AevatarSignalR")
                 .AddMemoryGrainStorage("PubSubStore")
                 .AddMemoryGrainStorageAsDefault()
                 .AddLogStorageBasedLogConsistencyProvider("LogStorage");

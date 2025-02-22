@@ -1,6 +1,8 @@
 using System.Reflection;
 using Aevatar.Plugins;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Orleans.Metadata;
 using Orleans.Serialization;
 using Volo.Abp;
 using Volo.Abp.Modularity;

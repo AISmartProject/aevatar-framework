@@ -29,6 +29,21 @@ public class GAgentManager : IGAgentManager
         return gAgentTypes;
     }
 
+    public List<Type> GetAvailableEventTypes()
+    {
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var eventTypes = new List<Type>();
+
+        foreach (var assembly in assemblies)
+        {
+            var types = assembly.GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(EventBase)) && t is { IsClass: true, IsAbstract: false });
+            eventTypes.AddRange(types);
+        }
+
+        return eventTypes;
+    }
+
     public List<GrainType> GetAvailableGAgentGrainTypes()
     {
         var types = GetAvailableGAgentTypes();

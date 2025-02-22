@@ -1,9 +1,17 @@
 using Aevatar.Core.Abstractions;
-using Aevatar.Core.Tests.TestStateLogEvents;
-using Aevatar.Core.Tests.TestStates;
-using Microsoft.Extensions.Logging;
 
 namespace Aevatar.Core.Tests.TestGAgents;
+
+[GenerateSerializer]
+public class GroupGAgentState : StateBase
+{
+    [Id(0)]  public int RegisteredGAgents { get; set; } = 0;
+}
+
+public class GroupStateLogEvent : StateLogEventBase<GroupStateLogEvent>
+{
+    
+}
 
 [GAgent("group", "test")]
 public class GroupGAgent : GAgentBase<GroupGAgentState, GroupStateLogEvent>

@@ -4,5 +4,5 @@ public class AevatarCoreConstants
 {
     public const string StreamNamespace = "AINamespace";
     public const string StreamProvider = "Aevatar";
-    public const string GAgentDefaultNamespace = "aevatar";
+    public const char GAgentNamespaceSeparator = '.';
 }

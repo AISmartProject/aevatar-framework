@@ -1,5 +1,4 @@
 using System.Reflection;
-using Aevatar;
 using Aevatar.Core.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
