@@ -8,9 +8,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aevatar.Core", "src\Aevatar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aevatar.Core.Abstractions", "src\Aevatar.Core.Abstractions\Aevatar.Core.Abstractions.csproj", "{163DB313-21C2-4292-8795-A5E9ED200CC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansTestKit", "test\OrleansTestKit\OrleansTestKit.csproj", "{9C29455C-276F-4006-8A67-F1ECB78F9DD3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aevatar.TestKit", "test\Aevatar.TestKit\Aevatar.TestKit.csproj", "{9C29455C-276F-4006-8A67-F1ECB78F9DD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansTestKit.Tests", "test\OrleansTestKit.Tests\OrleansTestKit.Tests.csproj", "{42158451-CF7A-4084-9927-3F11FE08D0D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aevatar.TestKit.Tests", "test\Aevatar.TestKit.Tests\Aevatar.TestKit.Tests.csproj", "{42158451-CF7A-4084-9927-3F11FE08D0D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aevatar.EventSourcing.Core", "src\Aevatar.EventSourcing.Core\Aevatar.EventSourcing.Core.csproj", "{4787AF76-981A-4D29-A4F0-466981E7E780}"
 EndProject
