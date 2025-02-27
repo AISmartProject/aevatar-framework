@@ -47,12 +47,10 @@ public abstract partial class
 
     private readonly List<EventWrapperBaseAsyncObserver> _observers = [];
 
-    private IEnumerable<IEventDispatcher?> EventDispatchers { get; set; }
     private readonly AevatarOptions _aevatarOptions;
 
     protected GAgentBase()
     {
-        EventDispatchers = ServiceProvider.GetService<IEnumerable<IEventDispatcher>>() ?? [];
         _aevatarOptions = ServiceProvider.GetRequiredService<IOptionsSnapshot<AevatarOptions>>().Value;
     }
 
@@ -213,17 +211,18 @@ public abstract partial class
         return Task.CompletedTask;
     }
 
-
     private async Task BaseOnActivateAsync(CancellationToken cancellationToken)
     {
         // This must be called first to initialize Observers field.
         await UpdateObserverListAsync(GetType());
-        await InitializeOrResumeStreamAsync();
+        await InitializeOrResumeEventWrapperBaseStreamAsync();
+        await InitializeOrResumeStateLogEventBaseStreamAsync();
+        await InitializeOrResumeStateBaseStreamAsync();
     }
 
-    private async Task InitializeOrResumeStreamAsync()
+    private async Task InitializeOrResumeEventWrapperBaseStreamAsync()
     {
-        var streamOfThisGAgent = GetStream(this.GetGrainId().ToString());
+        var streamOfThisGAgent = GetEventWrapperBaseStream(this.GetGrainId().ToString());
         var handles = await streamOfThisGAgent.GetAllSubscriptionHandles();
         var asyncObserver = new GAgentAsyncObserver(_observers);
         if (handles.Count > 0)
@@ -236,6 +235,44 @@ public abstract partial class
         else
         {
             await streamOfThisGAgent.SubscribeAsync(asyncObserver);
+        }
+    }
+
+    private async Task InitializeOrResumeStateLogEventBaseStreamAsync()
+    {
+        var stream = GetStateLogEventBaseStream(this.GetGrainId().ToString());
+        var handles = await stream.GetAllSubscriptionHandles();
+        var stateLogEventHandlers = ServiceProvider.GetRequiredService<IEnumerable<IGAgentStateLogEventHandler>>();
+        var asyncObserver = new StateLogEventBaseAsyncObserver(this, stateLogEventHandlers);
+        if (handles.Count > 0)
+        {
+            foreach (var handle in handles)
+            {
+                await handle.ResumeAsync(asyncObserver);
+            }
+        }
+        else
+        {
+            await stream.SubscribeAsync(asyncObserver);
+        }
+    }
+    
+    private async Task InitializeOrResumeStateBaseStreamAsync()
+    {
+        var stream = GetStateBaseStream(this.GetGrainId().ToString());
+        var handles = await stream.GetAllSubscriptionHandles();
+        var stateHandlers = ServiceProvider.GetRequiredService<IEnumerable<IGAgentStateHandler>>();
+        var asyncObserver = new StateBseAsyncObserver(this, stateHandlers);
+        if (handles.Count > 0)
+        {
+            foreach (var handle in handles)
+            {
+                await handle.ResumeAsync(asyncObserver);
+            }
+        }
+        else
+        {
+            await stream.SubscribeAsync(asyncObserver);
         }
     }
 
@@ -263,17 +300,11 @@ public abstract partial class
     private async Task InternalOnStateChangedAsync()
     {
         await HandleStateChangedAsync();
-        //TODO:  need optimize use kafka,ensure Es written successfully
-        foreach (var eventDispatcher in EventDispatchers)
-        {
-            if (eventDispatcher != null)
-            {
-                await eventDispatcher.PublishAsync(State, this.GetGrainId());
-            }
-        }
+        var stateStream = GetStateBaseStream(this.GetGrainId().ToString());
+        await stateStream.OnNextAsync(State);
     }
 
-    protected sealed override async void RaiseEvent<T>(T @event)
+    protected sealed override void RaiseEvent<T>(T @event)
     {
         Logger.LogDebug("base raiseEvent info:{info}", JsonConvert.SerializeObject(@event));
         base.RaiseEvent(@event);
@@ -289,25 +320,33 @@ public abstract partial class
     private async Task InternalRaiseEventAsync<T>(T @event)
     {
         await HandleRaiseEventAsync();
-        //TODO:  need optimize use kafka,ensure Es written successfully
-        var stateLogEvent = @event as StateLogEventBase;
-        foreach (var eventDispatcher in EventDispatchers)
+        if (@event is StateLogEventBase stateLogEvent)
         {
-            if (eventDispatcher != null)
-            {
-                await eventDispatcher.PublishAsync(stateLogEvent!.Id, this.GetGrainId(), stateLogEvent);
-            }
+            var stateLogEventStream = GetStateLogEventBaseStream(this.GetGrainId().ToString());
+            await stateLogEventStream.OnNextAsync(stateLogEvent);
         }
     }
 
-    protected virtual async Task HandleRaiseEventAsync()
+    protected virtual Task HandleRaiseEventAsync()
     {
-
+        return Task.CompletedTask;
     }
 
-    private IAsyncStream<EventWrapperBase> GetStream(string grainIdString)
+    private IAsyncStream<EventWrapperBase> GetEventWrapperBaseStream(string grainIdString)
     {
         var streamId = StreamId.Create(_aevatarOptions.StreamNamespace, grainIdString);
         return StreamProvider.GetStream<EventWrapperBase>(streamId);
+    }
+
+    private IAsyncStream<StateLogEventBase> GetStateLogEventBaseStream(string grainIdString)
+    {
+        var streamId = StreamId.Create(_aevatarOptions.StreamNamespace + ".StateLogEvent", grainIdString);
+        return StreamProvider.GetStream<StateLogEventBase>(streamId);
+    }
+
+    private IAsyncStream<StateBase> GetStateBaseStream(string grainIdString)
+    {
+        var streamId = StreamId.Create(_aevatarOptions.StreamNamespace + ".State", grainIdString);
+        return StreamProvider.GetStream<StateBase>(streamId);
     }
 }

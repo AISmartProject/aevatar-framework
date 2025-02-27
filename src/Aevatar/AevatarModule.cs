@@ -1,6 +1,8 @@
 ﻿using Aevatar.Core;
 using Aevatar.Core.Abstractions;
 using Aevatar.Core.Abstractions.Plugin;
+using Aevatar.Core.StateHandlers;
+using Aevatar.Core.StateLogEventHandlers;
 using Aevatar.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.Autofac;
@@ -35,5 +37,7 @@ public class AevatarModule : AbpModule
         context.Services.AddSingleton<IGAgentFactory, GAgentFactory>();
         context.Services.AddSingleton<IPluginGAgentManager, PluginGAgentManager>();
         context.Services.AddSingleton<IConfigureGrainTypeComponents, ConfigureAevatarGrainActivator>();
+        context.Services.AddSingleton<IGAgentStateHandler, EventDispatchStateHandler>();
+        context.Services.AddSingleton<IGAgentStateLogEventHandler, EventDispatchStateLogEventHandler>();
     }
 }
