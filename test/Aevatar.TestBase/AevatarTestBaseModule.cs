@@ -20,10 +20,7 @@ public class AevatarTestBaseModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        Configure<AbpAuditingOptions>(options =>
-        {
-            options.IsEnabled = false;
-        });
+        Configure<AbpAuditingOptions>(options => { options.IsEnabled = false; });
         context.Services.AddSingleton<ClusterFixture>();
         context.Services.AddSingleton<IClusterClient>(sp => context.Services.GetRequiredService<ClusterFixture>().Cluster.Client);
         context.Services.AddSingleton<IGrainFactory>(sp => context.Services.GetRequiredService<ClusterFixture>().Cluster.GrainFactory);

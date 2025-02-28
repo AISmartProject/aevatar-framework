@@ -8,7 +8,7 @@
         <PackageId>Aevatar.EventSourcing.MongoDB</PackageId>
         <Title>aevatar Framework</Title>
         <Authors>AElf</Authors>
-        <Description>The abstraction package to the Aevatar.Core framework.</Description>
+        <Description>The MongoDb implemetion of event sourcing for orleans.</Description>
         <PackageTags>agent</PackageTags>
         <RepositoryUrl>https://github.com/aevatarAI/aevatar-framework</RepositoryUrl>
         <RepositoryType>git</RepositoryType>

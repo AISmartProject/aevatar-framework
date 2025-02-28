@@ -1,9 +1,14 @@
 ﻿using Aevatar.Core.Abstractions;
 using Aevatar.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureAppConfiguration((_, config) =>
+    {
+        config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+    })
     .UseOrleans(silo =>
     {
         silo.AddMemoryGrainStorage("Default")

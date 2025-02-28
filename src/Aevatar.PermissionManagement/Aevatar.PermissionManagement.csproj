@@ -4,6 +4,15 @@
         <TargetFramework>$(DefaultTargetFramework)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageType>Dependency</PackageType>
+        <PackageId>Aevatar.PermissionManagement</PackageId>
+        <Title>aevatar Framework</Title>
+        <Authors>AElf</Authors>
+        <Description>The permission management integration for aevatar framework.</Description>
+        <PackageTags>agent</PackageTags>
+        <RepositoryUrl>https://github.com/aevatarAI/aevatar-framework</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageProjectUrl>https://github.com/aevatarAI/aevatar-framework</PackageProjectUrl>
     </PropertyGroup>
 
     <ItemGroup>

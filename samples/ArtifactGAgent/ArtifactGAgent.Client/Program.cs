@@ -7,7 +7,6 @@ using Aevatar.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
-using Volo.Abp.Security.Claims;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseOrleansClient(client =>

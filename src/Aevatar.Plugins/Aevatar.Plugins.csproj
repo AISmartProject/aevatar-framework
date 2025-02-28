@@ -8,7 +8,7 @@
         <PackageId>Aevatar.Plugins</PackageId>
         <Title>aevatar Framework</Title>
         <Authors>AElf</Authors>
-        <Description>The abstraction package to the Aevatar.Core framework.</Description>
+        <Description>The plugin GAgent mechanism implementation for aevatar framework.</Description>
         <PackageTags>agent</PackageTags>
         <RepositoryUrl>https://github.com/aevatarAI/aevatar-framework</RepositoryUrl>
         <RepositoryType>git</RepositoryType>

@@ -30,6 +30,7 @@ public class AevatarModule : AbpModule
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
         Configure<AbpAutoMapperOptions>(options => { options.AddMaps<AevatarModule>(); });
+        Configure<AevatarOptions>(context.Services.GetConfiguration().GetSection("Aevatar"));
         context.Services.AddSingleton<IGAgentManager, GAgentManager>();
         context.Services.AddSingleton<IGAgentFactory, GAgentFactory>();
         context.Services.AddSingleton<IPluginGAgentManager, PluginGAgentManager>();
