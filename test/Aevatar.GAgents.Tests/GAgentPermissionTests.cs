@@ -4,6 +4,7 @@ using Aevatar.Core.Tests.TestGAgents;
 using Aevatar.PermissionManagement;
 using Aevatar.Plugins.Extensions;
 using Shouldly;
+using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.PermissionManagement;
 
 namespace Aevatar.GAgents.Tests;
@@ -41,10 +42,23 @@ public sealed class GAgentPermissionTests : AevatarGAgentsTestBase, IAsyncLifeti
         );
     }
 
+    [Fact]
+    public async Task PermissionCheckFilterTest()
+    {
+        RequestContext.Set("CurrentUser", new UserContext
+        {
+            UserId = "TestUser".ToGuid(),
+            Roles = ["Admin", "User"],
+        });
+        
+        var permissionGAgent = await _gAgentFactory.GetGAgentAsync<IPermissionGAgent>();
+        await permissionGAgent.DoSomething1Async();
+    }
+
     public async Task InitializeAsync()
     {
         var userId = "TestUser".ToGuid().ToString();
-        await _permissionManager.SetAsync("DoSomething", "User", userId, true);
+        await _permissionManager.SetAsync("DoSomething1", UserPermissionValueProvider.ProviderName, userId, true);
     }
 
     public Task DisposeAsync()

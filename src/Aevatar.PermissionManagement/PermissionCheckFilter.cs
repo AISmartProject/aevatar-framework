@@ -1,7 +1,7 @@
 using System.Reflection;
+using System.Security.Authentication;
 using System.Security.Claims;
-using Orleans;
-using Orleans.Runtime;
+using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.Security.Claims;
@@ -10,13 +10,12 @@ namespace Aevatar.PermissionManagement;
 
 public class PermissionCheckFilter : IIncomingGrainCallFilter
 {
-    private readonly IPermissionChecker _permissionChecker;
-    private readonly IPermissionManager _permissionManager;
+    private readonly IServiceProvider _serviceProvider;
+    private IPermissionChecker _permissionChecker;
 
-    public PermissionCheckFilter(IPermissionChecker permissionChecker, IPermissionManager permissionManager)
+    public PermissionCheckFilter(IServiceProvider serviceProvider)
     {
-        _permissionChecker = permissionChecker;
-        _permissionManager = permissionManager;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task Invoke(IIncomingGrainCallContext context)
@@ -24,49 +23,41 @@ public class PermissionCheckFilter : IIncomingGrainCallFilter
         var method = context.ImplementationMethod;
         var permissionAttribute = method.GetCustomAttribute<PermissionAttribute>();
 
-        if (permissionAttribute != null)
+        if (permissionAttribute == null)
         {
-            if (RequestContext.Get("CurrentUser") is not UserContext currentUser) return;
-            //var isGranted = await CheckPermissionViaPermissionCheckerAsync(currentUser, permissionAttribute);
-            var isGranted = await CheckPermissionViaPermissionManagerAsync(currentUser, permissionAttribute);
-            if (!isGranted)
-            {
-                throw new UnauthorizedAccessException(
-                    $"Required permission '{permissionAttribute.Name}' is not granted."
-                );
-            }
+            await context.Invoke();
+            return;
+        }
+
+        if (RequestContext.Get("CurrentUser") is not UserContext currentUser)
+        {
+            throw new AuthenticationException("Request requires authentication");
+        }
+
+        using var scope = _serviceProvider.CreateScope();
+        var checker = scope.ServiceProvider.GetRequiredService<IPermissionChecker>();
+        var permissionName = permissionAttribute.Name;
+
+        var principal = BuildClaimsPrincipal(currentUser);
+
+        if (!await checker.IsGrantedAsync(principal, permissionName))
+        {
+            throw new AuthenticationException($"Missing permission: {permissionName}");
         }
 
         await context.Invoke();
     }
 
-    private async Task<bool> CheckPermissionViaPermissionManagerAsync(UserContext currentUser,
-        PermissionAttribute permissionAttribute)
+    private static ClaimsPrincipal BuildClaimsPrincipal(UserContext user)
     {
-        var permission =
-            await _permissionManager.GetAsync(permissionAttribute.Name, "User", currentUser.UserId.ToString());
-        return permission.IsGranted;
-    }
-
-    private async Task<bool> CheckPermissionViaPermissionCheckerAsync(UserContext currentUser,
-        PermissionAttribute permissionAttribute)
-    {
-        var claimsPrincipal = new ClaimsPrincipal(
-            new ClaimsIdentity([
-                new Claim(AbpClaimTypes.UserId, currentUser.UserId.ToString()),
-                new Claim(AbpClaimTypes.Role, currentUser.Role)
-            ], "Bearer"));
-
-        if (claimsPrincipal.Identity is not { IsAuthenticated: true })
+        var claims = new List<Claim>
         {
-            throw new UnauthorizedAccessException("User is not authenticated.");
-        }
+            new(AbpClaimTypes.UserId, user.UserId.ToString()),
+            new(AbpClaimTypes.UserName, user.UserName),
+            new(AbpClaimTypes.Email, user.Email)
+        };
+        claims.AddRange(user.Roles.Select(role => new Claim(AbpClaimTypes.Role, role)));
 
-        var isGranted = await _permissionChecker.IsGrantedAsync(
-            claimsPrincipal,
-            permissionAttribute.Name
-        );
-
-        return isGranted;
+        return new ClaimsPrincipal(new ClaimsIdentity(claims, "Bearer"));
     }
 }

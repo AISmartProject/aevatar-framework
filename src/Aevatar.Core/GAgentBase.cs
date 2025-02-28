@@ -272,7 +272,7 @@ public abstract partial class
 
     protected sealed override async void RaiseEvent<T>(T @event)
     {
-        Logger.LogInformation("base raiseEvent info:{info}", JsonConvert.SerializeObject(@event));
+        Logger.LogDebug("base raiseEvent info:{info}", JsonConvert.SerializeObject(@event));
         base.RaiseEvent(@event);
         InternalRaiseEventAsync(@event).ContinueWith(task =>
         {
@@ -287,10 +287,10 @@ public abstract partial class
     {
         await HandleRaiseEventAsync();
         //TODO:  need optimize use kafka,ensure Es written successfully
-        var gEvent = @event as StateLogEventBase;
+        var stateLogEvent = @event as StateLogEventBase;
         if (EventDispatcher != null)
         {
-            await EventDispatcher.PublishAsync(gEvent!.Id, this.GetGrainId(), gEvent);
+            await EventDispatcher.PublishAsync(stateLogEvent!.Id, this.GetGrainId(), stateLogEvent);
         }
     }
 
